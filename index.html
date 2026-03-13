@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoIQ - Apresentação Comercial Interativa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Inter:wght@400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --color-dark: #0A0E27;
+            --color-accent: #3B82F6;
+            --color-accent-light: #60A5FA;
+            --color-accent-dark: #2563EB;
+            --color-success: #00D9A3;
+            --color-warning: #FFB800;
+            --color-purple: #8B5CF6;
+            --color-text: #E8EBF7;
+            --color-text-muted: #9BA3C1;
+            --color-bg-card: rgba(255, 255, 255, 0.03);
+            --color-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--color-dark);
+            color: var(--color-text);
+            overflow: hidden;
+            cursor: default;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3vh 4vw;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+            overflow: hidden;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 10;
+        }
+        
+        .slide.prev {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        
+        /* Background effects */
+        .bg-gradient {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(96, 165, 250, 0.12) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .bg-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Navigation */
+        .nav-controls {
+            position: fixed;
+            bottom: 3vh;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: 1px solid var(--color-border);
+        }
+        
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-dot.active {
+            background: var(--color-accent);
+            width: 28px;
+            border-radius: 5px;
+        }
+        
+        .nav-dot:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
+        .nav-arrows {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 3vw;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .nav-arrow {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            pointer-events: all;
+            font-size: 18px;
+        }
+        
+        .nav-arrow:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--color-accent);
+        }
+        
+        .nav-arrow.disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        
+        /* Logo */
+        .logo {
+            position: fixed;
+            top: 3vh;
+            left: 3vw;
+            z-index: 1000;
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 20px;
+            letter-spacing: -1px;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Typography - Responsive */
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: clamp(3rem, 6vw, 6rem);
+            line-height: 1.1;
+            margin-bottom: 2vh;
+            letter-spacing: -2px;
+        }
+        
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            line-height: 1.2;
+            margin-bottom: 1.5vh;
+            letter-spacing: -1px;
+        }
+        
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: clamp(1.2rem, 2vw, 2rem);
+            margin-bottom: 1.5vh;
+        }
+        
+        .accent-text { color: var(--color-accent); }
+        .success-text { color: var(--color-success); }
+        
+        /* Input Modal Overlay */
+        .input-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .input-overlay.active {
+            display: flex;
+        }
+        
+        .input-modal {
+            background: var(--color-dark);
+            border: 2px solid var(--color-accent);
+            border-radius: 24px;
+            padding: 4vh 4vw;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+        }
+        
+        .input-modal h2 {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            margin-bottom: 3vh;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 2.5vh;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            margin-bottom: 1vh;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            color: var(--color-text);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .input-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 3vh;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: var(--color-accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--color-accent-light);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--color-bg-card);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Edit Button */
+        .edit-data-btn {
+            position: fixed;
+            top: 3vh;
+            right: 3vw;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            color: var(--color-text);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        .edit-data-btn.visible {
+            display: block;
+        }
+        
+        .edit-data-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--color-accent);
+        }
+        
+        /* Cards Grid - Responsive */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5vw;
+            width: 100%;
+            max-width: 1400px;
+            margin-top: 2vh;
+        }
+        
+        .card {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-accent);
+            border-radius: 20px;
+            padding: 2vh 1.5vw;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-accent), var(--color-accent-light));
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--color-accent-light);
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+        }
+        
+        .card-icon {
+            font-size: clamp(2.5rem, 4vw, 4rem);
+            margin-bottom: 2vh;
+            display: block;
+        }
+        
+        .card-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 1.5vw, 1.5rem);
+            margin-bottom: 1.5vh;
+        }
+        
+        .card-amount {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+            color: var(--color-accent);
+            margin-bottom: 1vh;
+        }
+        
+        .card-desc {
+            color: var(--color-text-muted);
+            font-size: clamp(0.85rem, 1vw, 1rem);
+        }
+        
+        .impact-banner {
+            margin-top: 2vh;
+            padding: 2vh 3vw;
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+            border-radius: 16px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.2rem, 2vw, 1.75rem);
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4);
+        }
+        
+        /* Steps Container */
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 2vh;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 2vw;
+            background: var(--color-bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 1.5vh 2vw;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        
+        .step::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: var(--step-color);
+            border-radius: 16px 0 0 16px;
+        }
+        
+        .step:hover {
+            transform: translateX(8px);
+            border-color: var(--step-color);
+        }
+        
+        .step-number {
+            width: clamp(50px, 4vw, 60px);
+            height: clamp(50px, 4vw, 60px);
+            border-radius: 50%;
+            background: var(--step-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 1.5vw, 1.5rem);
+            margin-bottom: 0.5vh;
+        }
+        
+        .step-time {
+            display: inline-block;
+            padding: 0.5vh 1vw;
+            background: var(--step-color);
+            border-radius: 16px;
+            font-size: clamp(0.75rem, 0.9vw, 0.9rem);
+            font-weight: 600;
+            margin-bottom: 1vh;
+            color: var(--color-dark);
+        }
+        
+        .step-desc {
+            color: var(--color-text-muted);
+            font-size: clamp(0.85rem, 1vw, 1rem);
+            line-height: 1.5;
+        }
+        
+        /* Value Split */
+        .value-split {
+            display: grid;
+            grid-template-columns: 1.5fr 400px;
+            gap: 4vw;
+            width: 100%;
+            max-width: 1400px;
+            margin-top: 4vh;
+        }
+        
+        .value-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2vh;
+        }
+        
+        .value-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5vh 1.5vw;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .value-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(8px);
+        }
+        
+        .value-item-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: clamp(0.85rem, 1vw, 1rem);
+        }
+        
+        .value-item-price {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+            color: var(--color-success);
+        }
+        
+        .value-total {
+            margin-top: 2vh;
+            padding: 2vh 1.5vw;
+            border-top: 2px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .value-total-label {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 1.3vw, 1.3rem);
+        }
+        
+        .value-total-price {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: clamp(1.3rem, 1.8vw, 1.8rem);
+        }
+        
+        .price-box {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--color-accent);
+            border-radius: 20px;
+            padding: 3.5vh 2vw;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            height: fit-content;
+        }
+        
+        .price-label {
+            font-size: clamp(0.7rem, 0.85vw, 0.85rem);
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.5vh;
+        }
+        
+        .price-original {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            color: var(--color-text-muted);
+            text-decoration: line-through;
+            margin-bottom: 1vh;
+        }
+        
+        .price-final {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: clamp(2.5rem, 4.5vw, 4.5rem);
+            color: var(--color-accent);
+            line-height: 1;
+            margin-bottom: 1.5vh;
+        }
+        
+        .price-installments {
+            font-size: clamp(0.9rem, 1vw, 1rem);
+            color: var(--color-text-muted);
+            margin-bottom: 2vh;
+        }
+        
+        .price-note {
+            font-size: clamp(0.75rem, 0.85vw, 0.85rem);
+            color: var(--color-text-muted);
+            font-style: italic;
+        }
+        
+        /* ROI */
+        .roi-flow {
+            display: flex;
+            align-items: stretch;
+            gap: 3vw;
+            max-width: 1200px;
+            margin: 2vh 0;
+        }
+        
+        .roi-box {
+            flex: 1;
+            padding: 2.5vh 2vw;
+            border-radius: 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .roi-box.invest {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid var(--color-accent);
+        }
+        
+        .roi-box.return {
+            background: rgba(0, 217, 163, 0.1);
+            border: 2px solid var(--color-success);
+        }
+        
+        .roi-label {
+            font-size: clamp(0.7rem, 0.9vw, 0.9rem);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.5vh;
+            color: var(--color-text-muted);
+        }
+        
+        .roi-amount {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: clamp(2rem, 3.5vw, 3.5rem);
+            line-height: 1;
+        }
+        
+        .roi-arrow {
+            font-size: clamp(2rem, 3vw, 3rem);
+            color: var(--color-text-muted);
+        }
+        
+        .roi-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2vh;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .roi-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5vh 2vw;
+            background: var(--color-bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .roi-item:hover {
+            border-color: var(--color-success);
+            transform: translateX(8px);
+        }
+        
+        .roi-item-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5vw;
+        }
+        
+        .roi-item-icon {
+            font-size: clamp(2rem, 3vw, 3rem);
+        }
+        
+        .roi-item-info h4 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 1.3vw, 1.3rem);
+            margin-bottom: 0.5vh;
+        }
+        
+        .roi-item-info p {
+            font-size: clamp(0.75rem, 0.9vw, 0.9rem);
+            color: var(--color-text-muted);
+        }
+        
+        .roi-item-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            color: var(--color-success);
+        }
+        
+        .roi-total {
+            margin-top: 1.5vh;
+            padding: 2vh 2vw;
+            background: linear-gradient(135deg, var(--color-dark), #1a1f3a);
+            border: 2px solid var(--color-success);
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .roi-total-text {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+        }
+        
+        /* Guarantee */
+        .guarantee-container {
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 2vh;
+        }
+        
+        .guarantee-box {
+            background: linear-gradient(135deg, rgba(0, 217, 163, 0.1), rgba(0, 217, 163, 0.05));
+            border: 3px solid var(--color-success);
+            border-radius: 20px;
+            padding: 4vh 3vw;
+            text-align: center;
+            margin-bottom: 3vh;
+        }
+        
+        .guarantee-icon {
+            font-size: clamp(3rem, 5vw, 5rem);
+            margin-bottom: 2vh;
+        }
+        
+        .guarantee-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: clamp(1.8rem, 2.6vw, 2.6rem);
+            margin-bottom: 2vh;
+        }
+        
+        .guarantee-text {
+            font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+            line-height: 1.5;
+            color: var(--color-text-muted);
+            margin-bottom: 2vh;
+        }
+        
+        .guarantee-highlight {
+            font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+            font-weight: 700;
+            color: var(--color-success);
+        }
+        
+        .cta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2vw;
+        }
+        
+        .cta-box {
+            padding: 2.5vh 2vw;
+            border-radius: 16px;
+            border: 2px solid var(--color-border);
+        }
+        
+        .cta-box.action {
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+            border-color: var(--color-accent);
+        }
+        
+        .cta-box h3 {
+            margin-bottom: 2vh;
+        }
+        
+        .cta-steps {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2vh;
+        }
+        
+        .cta-steps li {
+            padding-left: 2vw;
+            position: relative;
+            line-height: 1.5;
+            font-size: clamp(0.9rem, 1vw, 1rem);
+        }
+        
+        .cta-steps li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.4vh;
+            width: 16px;
+            height: 16px;
+            background: var(--color-success);
+            border-radius: 50%;
+        }
+        
+        /* Pricing Plans */
+        .pricing-plans {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3vw;
+            max-width: 1200px;
+            width: 100%;
+            margin-top: 4vh;
+        }
+        
+        .pricing-card {
+            background: var(--color-bg-card);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--color-border);
+            border-radius: 20px;
+            padding: 2.5vh 2vw;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--color-accent);
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-8px);
+        }
+        
+        .pricing-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-accent);
+            padding: 0.5vh 1.5vw;
+            border-radius: 20px;
+            font-size: clamp(0.7rem, 0.85vw, 0.85rem);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .pricing-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            margin-bottom: 1vh;
+            text-align: center;
+        }
+        
+        .pricing-subtitle {
+            text-align: center;
+            color: var(--color-text-muted);
+            font-size: clamp(0.85rem, 1vw, 1rem);
+            margin-bottom: 2.5vh;
+        }
+        
+        .pricing-amount {
+            text-align: center;
+            margin-bottom: 2.5vh;
+        }
+        
+        .pricing-price {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: clamp(2.5rem, 3.5vw, 3.5rem);
+            color: var(--color-accent);
+            line-height: 1;
+        }
+        
+        .pricing-period {
+            font-size: clamp(0.9rem, 1vw, 1rem);
+            color: var(--color-text-muted);
+            display: block;
+            margin-top: 0.5vh;
+        }
+        
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 2.5vh;
+        }
+        
+        .pricing-features li {
+            padding: 1vh 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: clamp(0.85rem, 1vw, 1rem);
+        }
+        
+        .pricing-features li::before {
+            content: '✓';
+            color: var(--color-success);
+            font-weight: 900;
+            font-size: 1.2em;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">StoIQ</div>
+    
+    <button class="edit-data-btn" onclick="showInputModal()">✏️ Editar Dados</button>
+    
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    
+    <!-- Input Modal -->
+    <div class="input-overlay" id="inputOverlay">
+        <div class="input-modal">
+            <h2>Perfil da Marca</h2>
+            <p style="text-align: center; color: var(--color-text-muted); margin-bottom: 3vh; font-size: 0.95rem;">Vamos entender seu negócio em 3 perguntas simples</p>
+            <div class="input-group">
+                <label>💰 Faturamento médio mensal (R$)</label>
+                <input type="text" id="faturamentoMensal" placeholder="150.000" oninput="formatInputValue(this)">
+            </div>
+            <div class="input-group">
+                <label>📦 Quanto você tem em estoque hoje? (R$)</label>
+                <input type="text" id="valorEstoque" placeholder="400.000" oninput="formatInputValue(this)">
+            </div>
+            <div class="input-group">
+                <label>🏭 Quanto você compra por mês de fornecedor? (R$)</label>
+                <input type="text" id="compraMensal" placeholder="80.000" oninput="formatInputValue(this)">
+            </div>
+            <div class="input-buttons">
+                <button class="btn btn-secondary" onclick="hideInputModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="calculateAndStart()">Calcular & Começar</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slide-container">
+        <!-- Slide 1: Hero -->
+        <div class="slide active" data-slide="1">
+            <div style="max-width: 1200px; text-align: center;">
+                <div style="font-size: clamp(1rem, 1.5vw, 1.5rem); color: var(--color-text-muted); margin-bottom: 2vh; text-transform: uppercase; letter-spacing: 3px;">Diagnóstico StoIQ</div>
+                <h1>Seu estoque está<br><span class="accent-text">sangrando dinheiro</span><br>todo dia</h1>
+                <p style="font-size: clamp(1.2rem, 2vw, 1.8rem); font-weight: 300; margin-top: 3vh; opacity: 0.8;">E você nem percebe...</p>
+                <div style="margin-top: 6vh; font-size: clamp(1rem, 1.3vw, 1.3rem); color: var(--color-text-muted);">
+                    Vamos calcular exatamente quanto está vazando do seu negócio
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 2: 3 Sangramentos -->
+        <div class="slide" data-slide="2">
+            <h2>Seus 3 sangramentos de dinheiro</h2>
+            <p style="text-align: center; font-size: clamp(1rem, 1.3vw, 1.3rem); color: var(--color-text-muted); margin-bottom: 4vh; max-width: 900px; margin-left: auto; margin-right: auto;">
+                Baseado nos números da sua marca, identificamos 3 problemas custando caro todo mês
+            </p>
+            <div class="cards-grid">
+                <div class="card">
+                    <span class="card-icon">💰</span>
+                    <div class="card-title">Capital Morto</div>
+                    <div class="card-amount" id="capitalMorto">-</div>
+                    <div class="card-desc" style="margin-bottom: 2vh;">Parado em produtos que não giram</div>
+                    <div style="padding-top: 1.5vh; border-top: 1px solid var(--color-border); font-size: clamp(0.75rem, 0.9vw, 0.9rem); color: var(--color-text-muted); line-height: 1.5;">
+                        Esse dinheiro poderia estar gerando vendas, mas está preso em estoque parado. 
+                        <div style="margin-top: 1vh; opacity: 0.7;">
+                            <strong style="color: var(--color-accent);">Cálculo:</strong> 35% do seu estoque está encalhado (benchmark mercado)
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <span class="card-icon">👻</span>
+                    <div class="card-title">Venda Fantasma</div>
+                    <div class="card-amount" id="vendaFantasma">-</div>
+                    <div class="card-desc" style="margin-bottom: 2vh;">Cliente quer comprar, você não tem</div>
+                    <div style="padding-top: 1.5vh; border-top: 1px solid var(--color-border); font-size: clamp(0.75rem, 0.9vw, 0.9rem); color: var(--color-text-muted); line-height: 1.5;">
+                        Produtos que vendem bem ficam em ruptura. Cliente desiste ou compra do concorrente.
+                        <div style="margin-top: 1vh; opacity: 0.7;">
+                            <strong style="color: var(--color-accent);">Cálculo:</strong> 20% do faturamento perdido por falta de estoque
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <span class="card-icon">🎲</span>
+                    <div class="card-title">Compra Errada</div>
+                    <div class="card-amount" id="compraCega">-</div>
+                    <div class="card-desc" style="margin-bottom: 2vh;">Comprou sem dados, virou encalhe</div>
+                    <div style="padding-top: 1.5vh; border-top: 1px solid var(--color-border); font-size: clamp(0.75rem, 0.9vw, 0.9rem); color: var(--color-text-muted); line-height: 1.5;">
+                        Decisões no feeling: mix errado, quantidade errada, timing errado. Vira estoque parado.
+                        <div style="margin-top: 1vh; opacity: 0.7;">
+                            <strong style="color: var(--color-accent);">Cálculo:</strong> 25% das compras acabam encalhando
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="impact-banner" id="impactTotal">-</div>
+        </div>
+        
+        <!-- Slide 3: O Sistema -->
+        <div class="slide" data-slide="3">
+            <h2>Como resolvemos os 3 problemas</h2>
+            <p style="text-align: center; color: var(--color-text-muted); margin-bottom: 3vh; font-size: clamp(1rem, 1.3vw, 1.3rem); max-width: 900px; margin-left: auto; margin-right: auto;">
+                Transformamos seus dados em decisões inteligentes para fechar cada uma das "torneiras"
+            </p>
+            <div class="steps-container">
+                <div class="step" style="--step-color: var(--color-accent)">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Pare de Perder Vendas</div>
+                        <div class="step-time">Primeiros 15 dias</div>
+                        <div class="step-desc">
+                            Identificamos EXATAMENTE quais produtos vão entrar em ruptura nos próximos 15 dias. 
+                            Você para de perder <span id="stop1" class="accent-text">-</span>/mês em vendas que estavam escapando.
+                            Nunca mais fica sem produto que vende.
+                        </div>
+                    </div>
+                </div>
+                <div class="step" style="--step-color: var(--color-warning)">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Destrave Seu Capital</div>
+                        <div class="step-time">60 dias</div>
+                        <div class="step-desc">
+                            Criamos estratégia para girar encalhados sem destruir margem: liquidações inteligentes, combos estratégicos, remanejamento de canal. 
+                            Você libera <span id="stop2" class="accent-text">-</span> que volta como caixa disponível.
+                        </div>
+                    </div>
+                </div>
+                <div class="step" style="--step-color: var(--color-purple)">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">Compre Com Precisão</div>
+                        <div class="step-time">90 dias</div>
+                        <div class="step-desc">
+                            Ensinamos o método: COMO analisar dados para decidir O QUE comprar, QUANTO comprar, QUANDO comprar. 
+                            Suas próximas compras têm 85%+ de acurácia (vs ~60% no feeling).
+                            Acaba o "acho que vai vender".
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 4vh; padding: 2.5vh 3vw; background: rgba(0, 217, 163, 0.1); border: 2px solid var(--color-success); border-radius: 16px; text-align: center;">
+                <p style="font-size: clamp(1.1rem, 1.4vw, 1.4rem); line-height: 1.6; color: var(--color-text); font-weight: 600;">
+                    10 semanas trabalhando junto, toda semana, implementando isso na prática
+                </p>
+            </div>
+        </div>
+        
+        <!-- Slide 4: Transformação -->
+        <div class="slide" data-slide="4">
+            <h2>As 10 semanas que mudam tudo</h2>
+            <p style="text-align: center; color: var(--color-text-muted); margin-bottom: 3vh; font-size: clamp(1rem, 1.3vw, 1.3rem); max-width: 900px; margin-left: auto; margin-right: auto;">
+                Da bagunça para clareza total: veja o que acontece semana a semana
+            </p>
+            <div class="steps-container">
+                <div class="step" style="--step-color: var(--color-accent)">
+                    <div class="step-content">
+                        <div class="step-title">📋 Semana 1-2: Arrumamos a Bagunça</div>
+                        <div class="step-desc">
+                            Corrigimos dados do ERP, eliminamos erros, criamos o primeiro dashboard. 
+                            <strong style="color: var(--color-text);">Você ENXERGA pela primeira vez onde o dinheiro está vazando.</strong>
+                            É como acender a luz num quarto escuro.
+                        </div>
+                    </div>
+                </div>
+                <div class="step" style="--step-color: var(--color-warning)">
+                    <div class="step-content">
+                        <div class="step-title">📈 Semana 3-6: Resultados Aparecem</div>
+                        <div class="step-desc">
+                            Rupturas sendo corrigidas, plano de giro rodando, vendas aumentando, capital destravando.
+                            <strong style="color: var(--color-text);">Todo domingo você recebe o relatório: o que melhorou, o que fazer na semana.</strong>
+                            É quando o dinheiro começa a voltar.
+                        </div>
+                    </div>
+                </div>
+                <div class="step" style="--step-color: var(--color-success)">
+                    <div class="step-content">
+                        <div class="step-title">🎓 Semana 7-10: Você Fica Independente</div>
+                        <div class="step-desc">
+                            Sistema rodando sozinho, seu time treinado, você sabe COMO olhar dados e decidir.
+                            <strong style="color: var(--color-text);">Você tem o método para sempre, não depende mais de nós.</strong>
+                            Você aprendeu a pescar.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="impact-banner" style="background: linear-gradient(135deg, var(--color-success), #00A87A);">
+                Resultado: 65-80% menos perdas • <span id="result1">-</span> destravado • 85%+ acurácia
+            </div>
+        </div>
+        
+        <!-- Slide 5: ROI -->
+        <div class="slide" data-slide="5">
+            <h2 style="margin-bottom: 1vh;">Quanto volta pro seu bolso em 90 dias</h2>
+            <p style="text-align: center; color: var(--color-text-muted); margin-bottom: 2vh; font-size: clamp(0.9rem, 1.1vw, 1.1rem);">
+                A pergunta mais importante: quanto dinheiro você vai recuperar?
+            </p>
+            <div class="roi-flow" style="margin: 2vh 0 1.5vh 0;">
+                <div class="roi-box invest">
+                    <div class="roi-label">VOCÊ INVESTE</div>
+                    <div class="roi-amount" style="color: var(--color-accent);">R$ 12 mil</div>
+                    <div style="margin-top: 0.8vh; font-size: clamp(0.7rem, 0.85vw, 0.85rem); color: var(--color-text-muted);">
+                        10 semanas de trabalho
+                    </div>
+                </div>
+                <div class="roi-arrow">→</div>
+                <div class="roi-box return">
+                    <div class="roi-label">VOCÊ RECUPERA</div>
+                    <div class="roi-amount success-text" id="roiTotal" style="white-space: nowrap;">-</div>
+                    <div style="margin-top: 0.8vh; font-size: clamp(0.7rem, 0.85vw, 0.85rem); color: var(--color-text-muted);">
+                        nos primeiros 3 meses
+                    </div>
+                </div>
+            </div>
+            <div style="margin: 1.5vh 0; text-align: center;">
+                <h3 style="font-size: clamp(1.1rem, 1.3vw, 1.3rem); color: var(--color-text); margin-bottom: 1.5vh;">
+                    De onde vem esse dinheiro? 3 fontes:
+                </h3>
+            </div>
+            <div class="roi-breakdown" style="gap: 1vh;">
+                <div class="roi-item" style="padding: 1.2vh 1.5vw;">
+                    <div class="roi-item-left">
+                        <span class="roi-item-icon" style="font-size: clamp(1.8rem, 2.5vw, 2.5rem);">📈</span>
+                        <div class="roi-item-info">
+                            <h4 style="font-size: clamp(0.95rem, 1.2vw, 1.2rem); margin-bottom: 0.3vh;">1. Vendas que você para de perder</h4>
+                            <p id="roiCalc1" style="margin-bottom: 0.3vh; font-size: clamp(0.7rem, 0.85vw, 0.85rem);">-</p>
+                            <div style="font-size: clamp(0.65rem, 0.8vw, 0.8rem); color: var(--color-text-muted);">
+                                Recuperamos 65% das vendas perdidas por ruptura
+                            </div>
+                        </div>
+                    </div>
+                    <div class="roi-item-value" id="roiValue1" style="font-size: clamp(1.3rem, 1.8vw, 1.8rem);">-</div>
+                </div>
+                <div class="roi-item" style="padding: 1.2vh 1.5vw;">
+                    <div class="roi-item-left">
+                        <span class="roi-item-icon" style="font-size: clamp(1.8rem, 2.5vw, 2.5rem);">💰</span>
+                        <div class="roi-item-info">
+                            <h4 style="font-size: clamp(0.95rem, 1.2vw, 1.2rem); margin-bottom: 0.3vh;">2. Dinheiro que destravamos</h4>
+                            <p id="roiCalc2" style="margin-bottom: 0.3vh; font-size: clamp(0.7rem, 0.85vw, 0.85rem);">-</p>
+                            <div style="font-size: clamp(0.65rem, 0.8vw, 0.8rem); color: var(--color-text-muted);">
+                                Liberamos 30% do capital encalhado virando caixa
+                            </div>
+                        </div>
+                    </div>
+                    <div class="roi-item-value" id="roiValue2" style="font-size: clamp(1.3rem, 1.8vw, 1.8rem);">-</div>
+                </div>
+                <div class="roi-item" style="padding: 1.2vh 1.5vw;">
+                    <div class="roi-item-left">
+                        <span class="roi-item-icon" style="font-size: clamp(1.8rem, 2.5vw, 2.5rem);">✅</span>
+                        <div class="roi-item-info">
+                            <h4 style="font-size: clamp(0.95rem, 1.2vw, 1.2rem); margin-bottom: 0.3vh;">3. Erros que você evita</h4>
+                            <p style="margin-bottom: 0.3vh; font-size: clamp(0.7rem, 0.85vw, 0.85rem);">Compras mais precisas (acurácia 60% → 85%)</p>
+                            <div style="font-size: clamp(0.65rem, 0.8vw, 0.8rem); color: var(--color-text-muted);">
+                                Você para de comprar produto que vira encalhe
+                            </div>
+                        </div>
+                    </div>
+                    <div class="roi-item-value" id="roiValue3" style="font-size: clamp(1.3rem, 1.8vw, 1.8rem);">-</div>
+                </div>
+            </div>
+            <div class="roi-total" style="margin-top: 1.5vh; padding: 1.5vh 2vw;">
+                <div class="roi-total-text" style="font-size: clamp(1rem, 1.3vw, 1.3rem);">
+                    <strong>ROI: <span class="success-text" id="roiMultiplier">-</span> o que você investiu</strong>
+                    <div style="font-size: clamp(0.8rem, 1vw, 1rem); margin-top: 0.5vh; color: var(--color-text-muted);">
+                        (sendo bem conservador nos números)
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 6: Investimento -->
+        <div class="slide" data-slide="6">
+            <h2 style="margin-bottom: 1vh;">Como funciona: 2 fases simples</h2>
+            <div class="pricing-plans" style="margin-top: 2vh;">
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">FASE 1 - OBRIGATÓRIA</div>
+                    <div class="pricing-title" style="font-size: clamp(1.3rem, 1.8vw, 1.8rem); margin-bottom: 0.5vh;">Implementação</div>
+                    <div class="pricing-subtitle" style="font-size: clamp(0.8rem, 0.95vw, 0.95rem);">Fazemos todo o trabalho em 10 semanas</div>
+                    <div class="pricing-amount" style="margin: 1.5vh 0;">
+                        <div class="pricing-price" style="font-size: clamp(2.2rem, 3vw, 3rem);">R$ 12.000</div>
+                        <span class="pricing-period" style="font-size: clamp(0.8rem, 0.95vw, 0.95rem);">ou 3x R$ 4.000 sem juros</span>
+                    </div>
+                    <div style="margin: 1.5vh 0; padding: 1.2vh; background: rgba(59, 130, 246, 0.15); border-radius: 12px; font-size: clamp(0.75rem, 0.9vw, 0.9rem); line-height: 1.5; text-align: center; font-weight: 600;">
+                        No final: sistema rodando + time treinado + você sabe fazer sozinho
+                    </div>
+                    <ul class="pricing-features" style="margin-bottom: 1vh;">
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">10 sessões semanais trabalhando junto</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">Arrumamos todos os dados do ERP</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">Dashboard que você usa todo domingo</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">Manual completo (seu time aprende)</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">3 estratégias prontas pra usar</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">WhatsApp direto com a gente</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem); color: var(--color-accent); font-weight: 600;">🎁 50% OFF no SaaS quando lançar</li>
+                    </ul>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-title" style="font-size: clamp(1.3rem, 1.8vw, 1.8rem); margin-bottom: 0.5vh;">Manutenção</div>
+                    <div class="pricing-subtitle" style="color: var(--color-success); font-size: clamp(0.8rem, 0.95vw, 0.95rem);">OPCIONAL - Só se você quiser continuar</div>
+                    <div class="pricing-amount" style="margin: 1.5vh 0;">
+                        <div class="pricing-price" style="color: var(--color-success); font-size: clamp(2.2rem, 3vw, 3rem);">R$ 2.000</div>
+                        <span class="pricing-period" style="font-size: clamp(0.8rem, 0.95vw, 0.95rem);">/mês depois das 10 semanas</span>
+                    </div>
+                    <div style="margin: 1.5vh 0; padding: 1.2vh; background: rgba(0, 217, 163, 0.15); border-radius: 12px; font-size: clamp(0.75rem, 0.9vw, 0.9rem); line-height: 1.5; text-align: center; font-weight: 600;">
+                        Você já sabe fazer sozinho. Mas se quiser suporte contínuo, seguimos junto.
+                    </div>
+                    <ul class="pricing-features" style="margin-bottom: 1vh;">
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">2 reuniões por mês (acompanhamento)</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">Continuamos analisando rupturas</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">Te ajudamos em decisões de compra</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">Ajustamos estratégia quando precisar</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">Suporte prioritário sempre</li>
+                        <li style="padding: 0.6vh 0; font-size: clamp(0.75rem, 0.9vw, 0.9rem); color: var(--color-success); font-weight: 600;">✅ Cancela quando quiser, sem multa</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Garantia -->
+        <div class="slide" data-slide="7">
+            <h2 style="margin-bottom: 1vh; font-size: clamp(1.8rem, 3.5vw, 3rem);">Nossa garantia <span class="success-text">"Mostre o dinheiro"</span></h2>
+            <div class="guarantee-container" style="margin-top: 1.5vh;">
+                <div class="guarantee-box" style="padding: 2.5vh 2vw; margin-bottom: 2vh;">
+                    <div class="guarantee-icon" style="font-size: clamp(2.5rem, 4vw, 4rem); margin-bottom: 1vh;">🛡️</div>
+                    <div class="guarantee-title" style="font-size: clamp(1.5rem, 2.2vw, 2.2rem); margin-bottom: 1.5vh;">60 DIAS PARA TESTAR</div>
+                    <div class="guarantee-text" style="font-size: clamp(0.9rem, 1.1vw, 1.1rem); margin-bottom: 2vh; line-height: 1.5;">
+                        Trabalhamos juntos por 6 semanas (60 dias).<br>
+                        Se você não VER o dinheiro voltando em pelo menos uma destas formas:
+                    </div>
+                    <div style="padding: 1.5vh 1.5vw; background: rgba(0, 217, 163, 0.1); border-radius: 12px; margin-bottom: 1.5vh;">
+                        <ul style="list-style: none; padding: 0; font-size: clamp(0.85rem, 1.05vw, 1.05rem); line-height: 1.8;">
+                            <li>✓ <span id="guaranteeValue1" style="font-weight: 900; color: var(--color-success);">-</span> em vendas recuperadas</li>
+                            <li>✓ <span id="guaranteeValue2" style="font-weight: 900; color: var(--color-success);">-</span> de capital destravado</li>
+                            <li>✓ <span id="guaranteeValue3" style="font-weight: 900; color: var(--color-success);">-</span> de erros evitados</li>
+                        </ul>
+                    </div>
+                    <div class="guarantee-highlight" style="font-size: clamp(1.1rem, 1.5vw, 1.5rem);">
+                        Devolvemos 100% + você fica com todo o trabalho
+                    </div>
+                </div>
+                <div class="cta-grid" style="gap: 1.5vw;">
+                    <div class="cta-box" style="padding: 2vh 1.5vw;">
+                        <h3 style="font-size: clamp(1.1rem, 1.4vw, 1.4rem); margin-bottom: 1vh;">📊 Se funcionar:</h3>
+                        <p style="font-size: clamp(1rem, 1.3vw, 1.3rem); margin: 1.5vh 0; color: var(--color-success); font-weight: 700;">
+                            Você recupera 10-20x o investimento
+                        </p>
+                        <h3 style="margin-top: 2vh; font-size: clamp(1.1rem, 1.4vw, 1.4rem); margin-bottom: 1vh;">❌ Se não funcionar:</h3>
+                        <p style="font-size: clamp(1rem, 1.3vw, 1.3rem); margin: 1.5vh 0; color: var(--color-text-muted); font-weight: 700;">
+                            Recebe 100% de volta
+                        </p>
+                        <div style="margin-top: 2vh; padding: 1.2vh; background: rgba(59, 130, 246, 0.2); border-radius: 12px; font-size: clamp(0.9rem, 1.1vw, 1.1rem); font-weight: 600;">
+                            Qual é o risco? Zero.
+                        </div>
+                    </div>
+                    <div class="cta-box action" style="padding: 2vh 1.5vw;">
+                        <h3 style="font-size: clamp(1.1rem, 1.4vw, 1.4rem); margin-bottom: 1vh;">✅ Próximos passos:</h3>
+                        <ul class="cta-steps" style="margin-top: 1.5vh;">
+                            <li style="font-size: clamp(0.8rem, 0.95vw, 0.95rem); padding: 0.6vh 0 0.6vh 1.8vw;"><strong>1. Agora:</strong> Você decide se quer fazer</li>
+                            <li style="font-size: clamp(0.8rem, 0.95vw, 0.95rem); padding: 0.6vh 0 0.6vh 1.8vw;"><strong>2. Call de 30min:</strong> Alinhamos expectativas</li>
+                            <li style="font-size: clamp(0.8rem, 0.95vw, 0.95rem); padding: 0.6vh 0 0.6vh 1.8vw;"><strong>3. Reserva vaga:</strong> Só 4 vagas/trimestre</li>
+                            <li style="font-size: clamp(0.8rem, 0.95vw, 0.95rem); padding: 0.6vh 0 0.6vh 1.8vw;"><strong>4. Semana que vem:</strong> Começamos o trabalho</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 2vh; padding: 2vh 3vw; background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark)); border-radius: 16px; text-align: center;">
+                <p style="font-size: clamp(1.1rem, 1.4vw, 1.4rem); line-height: 1.4; font-weight: 700; color: white;">
+                    Alguma pergunta ou podemos começar?
+                </p>
+            </div>
+        </div>
+        <div class="slide" data-slide="4">
+            <div style="margin-bottom: 3vh; padding: 2vh 3vw; background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--color-accent); border-radius: 8px;">
+                <p style="font-size: clamp(0.95rem, 1.2vw, 1.2rem); line-height: 1.6; color: var(--color-text);">
+                    <strong style="color: var(--color-accent);">💬 FALE:</strong> "Deixa eu te mostrar como funciona na prática, semana a semana:"
+                </p>
+            </div>
+            <h2>As <span class="success-text">10 semanas</span> que mudam tudo</h2>
+            <div class="steps-container">
+                <div class="step" style="--step-color: var(--color-accent)">
+                    <div class="step-content">
+                        <div class="step-title">📋 Semana 1-2: Arrumamos a Bagunça</div>
+                        <div class="step-desc">
+                            Pegamos os dados do seu ERP, corrigimos erros, criamos o primeiro dashboard. 
+                            <strong style="color: var(--color-text);">Você ENXERGA pela primeira vez onde o dinheiro está vazando.</strong>
+                        </div>
+                        <div style="margin-top: 1vh; padding: 1vh; background: rgba(59, 130, 246, 0.1); border-radius: 8px; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">
+                            💬 <strong>FALE:</strong> "É tipo acender a luz num quarto escuro. Você finalmente VÊ o que tá acontecendo."
+                        </div>
+                    </div>
+                </div>
+                <div class="step" style="--step-color: var(--color-warning)">
+                    <div class="step-content">
+                        <div class="step-title">📈 Semana 3-6: Resultados Aparecem</div>
+                        <div class="step-desc">
+                            Rupturas sendo corrigidas, plano de giro rodando, vendas aumentando, capital destravando.
+                            <strong style="color: var(--color-text);">Todo domingo você recebe o relatório: o que melhorou, o que fazer na semana.</strong>
+                        </div>
+                        <div style="margin-top: 1vh; padding: 1vh; background: rgba(255, 184, 0, 0.1); border-radius: 8px; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">
+                            💬 <strong>FALE:</strong> "É quando você começa a VER o dinheiro voltando. Vendas subindo, caixa melhorando."
+                        </div>
+                    </div>
+                </div>
+                <div class="step" style="--step-color: var(--color-success)">
+                    <div class="step-content">
+                        <div class="step-title">🎓 Semana 7-10: Você Fica Independente</div>
+                        <div class="step-desc">
+                            Sistema rodando sozinho, seu time treinado, você sabe COMO olhar dados e decidir.
+                            <strong style="color: var(--color-text);">Você tem o método para sempre, não depende mais de nós.</strong>
+                        </div>
+                        <div style="margin-top: 1vh; padding: 1vh; background: rgba(0, 217, 163, 0.1); border-radius: 8px; font-size: clamp(0.75rem, 0.9vw, 0.9rem);">
+                            💬 <strong>FALE:</strong> "No final você não tá 'contratando consultor pra sempre'. Você aprendeu a pescar."
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="impact-banner" style="background: linear-gradient(135deg, var(--color-success), #00A87A); position: relative;">
+                <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: var(--color-success); padding: 6px 20px; border-radius: 20px; font-size: clamp(0.7rem, 0.85vw, 0.85rem); white-space: nowrap;">
+                    💬 FALE: "E o resultado?"
+                </div>
+                65-80% menos perdas • <span id="result1">-</span> destravado • 85%+ acurácia
+            </div>
+        </div>
+        
+        <!-- Slide 5: ROI -->
+        <div class="slide" data-slide="5">
+            <div style="margin-bottom: 3vh; padding: 2vh 3vw; background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--color-accent); border-radius: 8px;">
+                <p style="font-size: clamp(0.95rem, 1.2vw, 1.2rem); line-height: 1.6; color: var(--color-text);">
+                    <strong style="color: var(--color-accent);">💬 FALE:</strong> "Agora a pergunta mais importante: quanto dinheiro você vai RECUPERAR fazendo isso?"
+                </p>
+            </div>
+            <h2>Quanto volta pro seu bolso em 90 dias</h2>
+            <div class="roi-flow">
+                <div class="roi-box invest">
+                    <div class="roi-label">VOCÊ INVESTE</div>
+                    <div class="roi-amount" style="color: var(--color-accent);">R$ 12.000</div>
+                    <div style="margin-top: 1vh; font-size: clamp(0.75rem, 0.9vw, 0.9rem); color: var(--color-text-muted);">
+                        10 semanas de trabalho
+                    </div>
+                </div>
+                <div class="roi-arrow">→</div>
+                <div class="roi-box return">
+                    <div class="roi-label">VOCÊ RECUPERA</div>
+                    <div class="roi-amount success-text" id="roiTotal">-</div>
+                    <div style="margin-top: 1vh; font-size: clamp(0.75rem, 0.9vw, 0.9rem); color: var(--color-text-muted);">
+                        nos primeiros 3 meses
+                    </div>
+                </div>
+            </div>
+            <div style="margin: 3vh 0; padding: 2vh 3vw; background: rgba(0, 217, 163, 0.1); border-left: 4px solid var(--color-success); border-radius: 8px; text-align: center;">
+                <p style="font-size: clamp(0.95rem, 1.2vw, 1.2rem); line-height: 1.6; color: var(--color-text);">
+                    <strong style="color: var(--color-success);">💬 FALE:</strong> "De onde vem esse dinheiro? São 3 fontes:"
+                </p>
+            </div>
+            <div class="roi-breakdown">
+                <div class="roi-item">
+                    <div class="roi-item-left">
+                        <span class="roi-item-icon">📈</span>
+                        <div class="roi-item-info">
+                            <h4>1. Vendas que você para de perder</h4>
+                            <p id="roiCalc1">-</p>
+                            <div style="margin-top: 0.5vh; font-size: clamp(0.75rem, 0.9vw, 0.9rem); color: var(--color-text-muted);">
+                                💬 Recuperamos 65% das vendas perdidas por ruptura
+                            </div>
+                        </div>
+                    </div>
+                    <div class="roi-item-value" id="roiValue1">-</div>
+                </div>
+                <div class="roi-item">
+                    <div class="roi-item-left">
+                        <span class="roi-item-icon">💰</span>
+                        <div class="roi-item-info">
+                            <h4>2. Dinheiro que destravamos</h4>
+                            <p id="roiCalc2">-</p>
+                            <div style="margin-top: 0.5vh; font-size: clamp(0.75rem, 0.9vw, 0.9rem); color: var(--color-text-muted);">
+                                💬 Liberamos 30% do capital encalhado virando caixa
+                            </div>
+                        </div>
+                    </div>
+                    <div class="roi-item-value" id="roiValue2">-</div>
+                </div>
+                <div class="roi-item">
+                    <div class="roi-item-left">
+                        <span class="roi-item-icon">✅</span>
+                        <div class="roi-item-info">
+                            <h4>3. Erros que você evita</h4>
+                            <p>Compras mais precisas (acurácia 60% → 85%)</p>
+                            <div style="margin-top: 0.5vh; font-size: clamp(0.75rem, 0.9vw, 0.9rem); color: var(--color-text-muted);">
+                                💬 Você para de comprar produto que vira encalhe
+                            </div>
+                        </div>
+                    </div>
+                    <div class="roi-item-value" id="roiValue3">-</div>
+                </div>
+            </div>
+            <div class="roi-total">
+                <div class="roi-total-text">
+                    <strong style="color: var(--color-success);">💬 FALE:</strong> "Isso é <span class="success-text" id="roiMultiplier">-</span> o que você investiu. 
+                    E isso sendo BEM conservador nos números."
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 6: Investimento -->
+        <div class="slide" data-slide="6">
+            <div style="margin-bottom: 3vh; padding: 2vh 3vw; background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--color-accent); border-radius: 8px;">
+                <p style="font-size: clamp(0.95rem, 1.2vw, 1.2rem); line-height: 1.6; color: var(--color-text);">
+                    <strong style="color: var(--color-accent);">💬 FALE:</strong> "Como funciona o investimento? São 2 fases bem simples:"
+                </p>
+            </div>
+            <h2>Como funciona: 2 fases</h2>
+            <div class="pricing-plans">
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">FASE 1 - OBRIGATÓRIA</div>
+                    <div class="pricing-title">Implementação</div>
+                    <div class="pricing-subtitle">Aqui fazemos TODO o trabalho</div>
+                    <div class="pricing-amount">
+                        <div class="pricing-price">R$ 12.000</div>
+                        <span class="pricing-period">ou 3x R$ 4.000 sem juros</span>
+                    </div>
+                    <div style="margin: 2vh 0; padding: 1.5vh; background: rgba(59, 130, 246, 0.1); border-radius: 12px; font-size: clamp(0.85rem, 1vw, 1rem); line-height: 1.5;">
+                        <strong style="color: var(--color-accent);">💬 FALE:</strong> "São 10 semanas. No final você tem o sistema rodando e sabe fazer sozinho."
+                    </div>
+                    <ul class="pricing-features">
+                        <li>10 sessões semanais trabalhando junto</li>
+                        <li>Arrumamos todos os dados do ERP</li>
+                        <li>Dashboard que você usa todo domingo</li>
+                        <li>Manual completo (seu time aprende)</li>
+                        <li>3 estratégias prontas pra usar</li>
+                        <li>WhatsApp direto com a gente</li>
+                        <li style="color: var(--color-accent); font-weight: 600;">🎁 50% OFF no SaaS quando lançar</li>
+                    </ul>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-title">Manutenção</div>
+                    <div class="pricing-subtitle" style="color: var(--color-success);">OPCIONAL - Só se você quiser</div>
+                    <div class="pricing-amount">
+                        <div class="pricing-price" style="color: var(--color-success);">R$ 2.000</div>
+                        <span class="pricing-period">/mês depois das 10 semanas</span>
+                    </div>
+                    <div style="margin: 2vh 0; padding: 1.5vh; background: rgba(0, 217, 163, 0.1); border-radius: 12px; font-size: clamp(0.85rem, 1vw, 1rem); line-height: 1.5;">
+                        <strong style="color: var(--color-success);">💬 FALE:</strong> "Você já sabe fazer sozinho. Mas se quiser ajuda contínua, a gente segue junto."
+                    </div>
+                    <ul class="pricing-features">
+                        <li>2 reuniões por mês (acompanhamento)</li>
+                        <li>Continuamos analisando rupturas</li>
+                        <li>Te ajudamos em decisões de compra</li>
+                        <li>Ajustamos estratégia quando precisar</li>
+                        <li>Suporte prioritário sempre</li>
+                        <li style="color: var(--color-success); font-weight: 600;">✅ Cancela quando quiser, sem multa</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="margin-top: 3vh; padding: 2vh 3vw; background: rgba(59, 130, 246, 0.1); border: 2px solid var(--color-accent); border-radius: 16px; text-align: center;">
+                <p style="font-size: clamp(1rem, 1.3vw, 1.3rem); line-height: 1.6; color: var(--color-text);">
+                    <strong style="color: var(--color-accent);">💬 FALE:</strong> "Resumindo: R$ 12 mil pra implementar. 
+                    Depois, se quiser continuar com a gente, R$ 2 mil/mês. Simples assim."
+                </p>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Garantia -->
+        <div class="slide" data-slide="7">
+            <div style="margin-bottom: 3vh; padding: 2vh 3vw; background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--color-accent); border-radius: 8px;">
+                <p style="font-size: clamp(0.95rem, 1.2vw, 1.2rem); line-height: 1.6; color: var(--color-text);">
+                    <strong style="color: var(--color-accent);">💬 FALE:</strong> "Última coisa antes de começar: minha garantia absurda"
+                </p>
+            </div>
+            <h2>Nossa garantia <span class="success-text">"Mostre o dinheiro"</span></h2>
+            <div class="guarantee-container">
+                <div class="guarantee-box">
+                    <div class="guarantee-icon">🛡️</div>
+                    <div class="guarantee-title">60 DIAS PARA TESTAR</div>
+                    <div class="guarantee-text" style="font-size: clamp(1rem, 1.3vw, 1.3rem); margin-bottom: 3vh;">
+                        Trabalhamos juntos por 6 semanas (60 dias).<br>
+                        <strong style="color: var(--color-text);">Se você não VER o dinheiro voltando...</strong>
+                    </div>
+                    <div class="guarantee-highlight" style="font-size: clamp(1.3rem, 1.8vw, 1.8rem); margin-bottom: 2vh;">
+                        Devolvemos 100% + você fica com todo o trabalho
+                    </div>
+                    <div style="padding: 2vh 2vw; background: rgba(0, 217, 163, 0.1); border-radius: 12px; font-size: clamp(0.9rem, 1.1vw, 1.1rem); line-height: 1.6;">
+                        <strong style="color: var(--color-success);">💬 FALE:</strong> "Você só precisa mostrar que NÃO conseguiu recuperar pelo menos 
+                        <span id="guaranteeValue1" style="font-weight: 900;">-</span> em vendas, 
+                        OU <span id="guaranteeValue2" style="font-weight: 900;">-</span> de capital destravado, 
+                        OU evitar <span id="guaranteeValue3" style="font-weight: 900;">-</span> de erros. Manda email. Devolvemos na hora."
+                    </div>
+                </div>
+                <div class="cta-grid">
+                    <div class="cta-box">
+                        <h3>📊 Se funcionar:</h3>
+                        <p style="font-size: clamp(1.1rem, 1.4vw, 1.4rem); margin: 2vh 0; color: var(--color-success); font-weight: 700;">
+                            Você recupera 10-20x o investimento
+                        </p>
+                        <h3 style="margin-top: 3vh;">❌ Se não funcionar:</h3>
+                        <p style="font-size: clamp(1.1rem, 1.4vw, 1.4rem); margin: 2vh 0; color: var(--color-text-muted); font-weight: 700;">
+                            Recebe 100% de volta
+                        </p>
+                        <div style="margin-top: 3vh; padding: 1.5vh; background: rgba(59, 130, 246, 0.1); border-radius: 12px; font-size: clamp(0.85rem, 1vw, 1vw);">
+                            <strong>💬 FALE:</strong> "Qual é o risco aqui? Zero."
+                        </div>
+                    </div>
+                    <div class="cta-box action">
+                        <h3>✅ Próximos passos:</h3>
+                        <ul class="cta-steps" style="margin-top: 2vh;">
+                            <li><strong>1. Agora:</strong> Você decide se quer fazer</li>
+                            <li><strong>2. Call de 30min:</strong> Alinhamos expectativas</li>
+                            <li><strong>3. Reserva vaga:</strong> Só 4 vagas/trimestre</li>
+                            <li><strong>4. Semana que vem:</strong> Começamos o trabalho</li>
+                        </ul>
+                        <div style="margin-top: 3vh; padding: 1.5vh; background: rgba(255, 255, 255, 0.1); border-radius: 12px; font-size: clamp(0.85rem, 1vw, 1vw); border: 2px solid white;">
+                            <strong>💬 FALE:</strong> "É simples: ou você ganha MUITO dinheiro, ou não perde nada. Faz sentido?"
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 3vh; padding: 2.5vh 3vw; background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark)); border-radius: 16px; text-align: center;">
+                <p style="font-size: clamp(1.2rem, 1.6vw, 1.6rem); line-height: 1.5; font-weight: 700;">
+                    <strong style="color: white;">💬 FALE:</strong> "Você tem alguma pergunta ou podemos começar?"
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div class="nav-arrows">
+        <div class="nav-arrow nav-prev" onclick="prevSlide()">←</div>
+        <div class="nav-arrow nav-next" onclick="nextSlide()">→</div>
+    </div>
+    
+    <div class="nav-controls">
+        <div class="nav-dot active" onclick="goToSlide(1)"></div>
+        <div class="nav-dot" onclick="goToSlide(2)"></div>
+        <div class="nav-dot" onclick="goToSlide(3)"></div>
+        <div class="nav-dot" onclick="goToSlide(4)"></div>
+        <div class="nav-dot" onclick="goToSlide(5)"></div>
+        <div class="nav-dot" onclick="goToSlide(6)"></div>
+        <div class="nav-dot" onclick="goToSlide(7)"></div>
+    </div>
+    
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 7;
+        let clientData = {
+            faturamentoMensal: 0,
+            valorEstoque: 0,
+            compraMensal: 0
+        };
+        
+        // Format input values with thousand separator
+        function formatInputValue(input) {
+            // Remove all non-digit characters
+            let value = input.value.replace(/\D/g, '');
+            
+            // Format with thousand separator
+            if (value) {
+                value = parseInt(value).toLocaleString('pt-BR');
+            }
+            
+            input.value = value;
+        }
+        
+        // Parse formatted value to number
+        function parseValue(formattedValue) {
+            return parseFloat(formattedValue.replace(/\./g, '').replace(/,/g, '.')) || 0;
+        }
+        
+        // Show input modal on load - REMOVED, will show after slide 1
+        // window.addEventListener('load', () => {
+        //     showInputModal();
+        // });
+        
+        function showInputModal() {
+            document.getElementById('inputOverlay').classList.add('active');
+        }
+        
+        function hideInputModal() {
+            document.getElementById('inputOverlay').classList.remove('active');
+        }
+        
+        function formatCurrency(value) {
+            return 'R$ ' + Math.round(value).toLocaleString('pt-BR');
+        }
+        
+        function formatCurrencyShort(value) {
+            if (value >= 1000000) {
+                return 'R$ ' + (value / 1000000).toFixed(1).replace('.', ',') + 'M';
+            } else if (value >= 1000) {
+                return 'R$ ' + (value / 1000).toFixed(0) + ' mil';
+            }
+            return formatCurrency(value);
+        }
+        
+        function calculateAndStart() {
+            // Get simple inputs - parse formatted values
+            clientData.faturamentoMensal = parseValue(document.getElementById('faturamentoMensal').value) || 150000;
+            clientData.valorEstoque = parseValue(document.getElementById('valorEstoque').value) || 400000;
+            clientData.compraMensal = parseValue(document.getElementById('compraMensal').value) || 80000;
+            
+            // INFERÊNCIAS BASEADAS EM BENCHMARKS DO MERCADO DE MODA:
+            
+            // 1. Capital Encalhado (estimativa conservadora)
+            // Regra: Do estoque total, 35-40% está encalhado (produtos sem giro adequado)
+            const encalhados = clientData.valorEstoque * 0.35; // 35% do estoque está encalhado
+            
+            // 2. Vendas Perdidas por Ruptura
+            // Regra: Marcas perdem 15-25% de vendas potenciais por ruptura
+            // Isso acontece em produtos que vendem bem mas ficam sem estoque
+            const vendasPerdidas = clientData.faturamentoMensal * 0.20; // 20% de perda
+            
+            // 3. Erro em Compras (compra produtos que não vendem)
+            // Regra: 20-30% das compras acabam virando encalhe
+            // Isso significa compra errada de mix/quantidade
+            const erroCompra = clientData.compraMensal * 0.25; // 25% de erro
+            
+            // Calculate all values for presentation
+            const calculations = {
+                // Slide 2 - Os 3 Sangramentos
+                capitalMorto: encalhados,
+                vendaFantasma: vendasPerdidas,
+                compraCega: erroCompra,
+                impactTrimestre: (vendasPerdidas * 3) + (encalhados * 0.05), // 3 meses de ruptura + 5% custo oportunidade/trimestre
+                
+                // Slide 3 - O que podemos parar
+                stopLoss: vendasPerdidas * 0.70, // 70% recovery (mais otimista pois é o foco)
+                capitalLiberate: encalhados * 0.30, // 30% release em 60 dias
+                
+                // Slide 4 - Resultados
+                resultRelease: encalhados * 0.30,
+                
+                // Slide 5 - ROI Detalhado
+                vendasRecuperadas: vendasPerdidas * 0.65 * 3, // 65% recovery over 3 months
+                capitalDestravado: encalhados * 0.30, // 30% release
+                erroEvitado: erroCompra * 3, // 3 meses de compras mais precisas
+            };
+            
+            calculations.roiTotal = calculations.vendasRecuperadas + calculations.capitalDestravado + calculations.erroEvitado;
+            calculations.roiMultiplier = (calculations.roiTotal / 12000).toFixed(1) + 'x';
+            
+            // Update Slide 2
+            document.getElementById('capitalMorto').textContent = formatCurrencyShort(calculations.capitalMorto);
+            document.getElementById('vendaFantasma').textContent = formatCurrencyShort(calculations.vendaFantasma);
+            document.getElementById('compraCega').textContent = formatCurrencyShort(calculations.compraCega);
+            document.getElementById('impactTotal').textContent = formatCurrencyShort(calculations.impactTrimestre) + ' do seu bolso TODOS OS TRIMESTRES';
+            
+            // Update Slide 3
+            document.getElementById('stop1').textContent = formatCurrencyShort(calculations.stopLoss);
+            document.getElementById('stop2').textContent = formatCurrencyShort(calculations.capitalLiberate);
+            
+            // Update Slide 4
+            document.getElementById('result1').textContent = formatCurrencyShort(calculations.resultRelease);
+            
+            // Update Slide 5 - ROI
+            document.getElementById('roiTotal').textContent = formatCurrencyShort(calculations.roiTotal);
+            document.getElementById('roiCalc1').textContent = formatCurrencyShort(vendasPerdidas) + '/mês × 0.65 × 3';
+            document.getElementById('roiValue1').textContent = formatCurrencyShort(calculations.vendasRecuperadas);
+            document.getElementById('roiCalc2').textContent = formatCurrencyShort(encalhados) + ' × 0.30';
+            document.getElementById('roiValue2').textContent = formatCurrencyShort(calculations.capitalDestravado);
+            document.getElementById('roiValue3').textContent = formatCurrencyShort(calculations.erroEvitado);
+            document.getElementById('roiMultiplier').textContent = calculations.roiMultiplier;
+            
+            // Update Slide 7 - Guarantee
+            const minGarantia = Math.min(20000, calculations.vendasRecuperadas * 0.3);
+            document.getElementById('guaranteeValue1').textContent = formatCurrencyShort(minGarantia);
+            document.getElementById('guaranteeValue2').textContent = formatCurrencyShort(calculations.capitalDestravado * 0.3);
+            document.getElementById('guaranteeValue3').textContent = formatCurrencyShort(calculations.erroEvitado * 0.3);
+            
+            // Hide modal and show edit button
+            hideInputModal();
+            document.querySelector('.edit-data-btn').classList.add('visible');
+            
+            // Advance to slide 2 if we're on slide 1
+            if (currentSlide === 1) {
+                currentSlide = 2;
+                updateSlides();
+            }
+        }
+        
+        function updateSlides() {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.nav-dot');
+            
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index + 1 === currentSlide) {
+                    slide.classList.add('active');
+                } else if (index + 1 < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+            
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index + 1 === currentSlide);
+            });
+            
+            // Update arrow states
+            document.querySelector('.nav-prev').classList.toggle('disabled', currentSlide === 1);
+            document.querySelector('.nav-next').classList.toggle('disabled', currentSlide === totalSlides);
+            
+            // Show edit button only after data is entered
+            if (clientData.faturamentoMensal > 0) {
+                document.querySelector('.edit-data-btn').classList.add('visible');
+            }
+        }
+        
+        function nextSlide() {
+            // If moving from slide 1 to slide 2 and no data entered yet, show modal
+            if (currentSlide === 1 && clientData.faturamentoMensal === 0) {
+                showInputModal();
+                return;
+            }
+            
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlides();
+            }
+        }
+        
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlides();
+            }
+        }
+        
+        function goToSlide(slideNumber) {
+            // If trying to go to slide 2+ without data, show modal first
+            if (slideNumber >= 2 && clientData.faturamentoMensal === 0) {
+                showInputModal();
+                return;
+            }
+            
+            currentSlide = slideNumber;
+            updateSlides();
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+        
+        // Initialize
+        updateSlides();
+    </script>
+</body>
+</html>
